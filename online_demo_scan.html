@@ -1,0 +1,170 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<title>Scan and upload documents in browsers | Dynamic Web TWAIN Online Demo</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
+<meta http-equiv="Content-Language" content="en-us"/>
+<meta http-equiv="X-UA-Compatible" content="requiresActiveX=true" />
+<meta name="viewport" content="width=device-width, maximum-scale=1.0" />
+<meta name="description" content="This online demo application (JavaScript + ASP.NET-C#) shows how to use the Dynamic Web TWAIN SDK to control any TWAIN compatible scanners in a web page." />
+<meta name="keyword" content="Dynamsoft, TWAIN, Scanners, SDK, Scanning"/>
+<link href="Styles/style.css" type="text/css" rel="stylesheet" />
+<script src="Scripts/common.js?t=170607"></script>
+<script>
+    if (dynamsoft.onlineNavInfo.deviceType == 'pc') {
+
+    } else {
+        window.location.replace("https://demo3.dynamsoft.com/dynamic-web-twain/online-document-scanning.aspx");
+    }
+</script>
+<!--[if IE]>
+<style>
+#divEdit { height:42px;}
+</style>
+<![endif]-->
+</head>
+
+<body>
+<div id="wrapper">
+    <div id="demoContent">
+        <div id="dwtScanDemo">
+            <div id="DWTcontainer" class="container">
+                <div id="DWTcontainerTop">
+                    <div id="divEdit">
+                        <ul class="operateGrp">
+                            <li><img class="menuIcon" style="margin-left: 5px;" src="Images/RemoveSelectedImages.png" title="Remove current page" alt="Remove current page" id="DW_btnRemoveCurrentImage" onclick="btnRemoveCurrentImage_onclick();" /></li>
+                            <li><img class="menuIcon" src="Images/RemoveAllImages.png" title="Remove All pages" alt="Remove All pages" id="DW_btnRemoveAllImages" onclick="btnRemoveAllImages_onclick();" /></li>
+                            <li style="width:90px;"></li>
+                            <li style="width:50px;line-height: 38px;"><input type="text" size="2" id="DW_CurrentImage" readonly="readonly" />/<input type="text" size="2" id="DW_TotalImage" readonly="readonly" /></li>
+                            <li style="width:110px;border-left: 1px solid #4A4A4A;border-right: solid 1px #4A4A4A;">
+                                <img class="menuIcon" src="Images/ZoomOut.png" title="ZoomOut" alt="Erase" id="btnZoomOut" onclick="btnZoomOut_onclick();" />
+                                <input type="text" id="DW_spanZoom" readonly="readonly" />
+                                <img class="menuIcon" src="Images/ZoomIn.png" title="ZoomIn" alt="ZoomIn" id="btnZoomIn" onclick="btnZoomIn_onclick();" />
+                            </li>
+                            <li><img style="margin-left: 10px;" class="menuIcon" src="Images/Orig_size.png" title="1:1" alt="1:1" id="btnOrigSize" onclick="btnOrigSize_onclick();" /><img class="menuIcon" src="Images/FitWindow.png" title="Fit To Window" alt="Fit To Window" id="btnFitWindow" style="display:none" onclick="btnFitWindow_onclick()" /></li>
+                            <li style="width:50px;"></li>
+                            <li><img class="menuIcon" src="Images/RotateLeft.png" title="Rotate Left" alt="Rotate Left" id="btnRotateL" onclick="btnRotateLeft_onclick()" /> </li>
+                            <li><img class="menuIcon grayimg" src="Images/Crop.png" title="please select an area to crop." alt="please select an area to crop." id="btnCropGray" /><img class="menuIcon" src="Images/Crop.png" title="Crop" alt="Crop" id="btnCrop" style="display:none" onclick="btnCrop_onclick();" /></li>
+                            <li><img class="menuIcon" src="Images/ShowEditor.png" title="Show Image Editor" alt="Show Image Editor" id="btnShowImageEditor" onclick="btnShowImageEditor_onclick();" /></li>
+                            <li><img class="menuIcon" src="Images/Select_selected.png" title="Select" alt="Select" id="btnSelect_selected" /><img class="menuIcon" style="display:none;" src="Images/Select.png" title="Select" alt="Select" id="btnSelect" onclick="btnSelect_onclick();" /></li>
+                            <li><img class="menuIcon" style="display:none;" src="Images/Hand_selected.png" title="Hand" alt="Erase" id="btnHand_selected" /><img class="menuIcon" src="Images/Hand.png" title="Hand" alt="Erase" id="btnHand" onclick="btnHand_onclick();" /></li>
+                        </ul>
+                    </div>
+                    <div id="dwtcontrolContainer"></div>
+                </div>
+                <div id="ScanWrapper">
+                    <div id="divScanner" class="divinput">
+                        <ul class="PCollapse">
+                            <li>
+                                <div class="divType">
+                                    Custom Scan
+                                </div>
+                                <div id="div_ScanImage" class="divTableStyle">
+                                    <ul id="ulScaneImageHIDE">
+                                        <li>
+                                            <label for="source">
+                                                <p>Select Source:</p>
+                                            </label>
+                                            <select size="1" id="source" style="position:relative;" onchange="source_onchange()">
+                                                <option value=""></option>
+                                            </select>
+                                        </li>
+                                        <li id="divProductDetail"></li>
+                                        <li>
+                                            <input id="btnScan" class="btnScanGray" disabled="disabled" type="button" value="Scan" onclick="acquireImage();" />
+                                            <a id="btnLoad" class="btnLoadAndSave" onclick="return btnLoadImagesOrPDFs_onclick()">Import Local Images ></a>
+                                        </li>
+                                    </ul>
+                                    <div id="tblLoadImage" style="visibility:hidden;">
+                                        <a href="javascript: void(0)" class="ClosetblLoadImage"><img class="imgClose" src="Images/Close.png" alt="Close tblLoadImage" /></a>
+                                        <img src="Images/Warning.png" />
+                                        <span class="spanContent">
+                                            <p class="contentTitle">No TWAIN compatible drivers detected</p>
+                                            <p class="contentDetail">You can Install a Virtual Scanner:</p>
+                                            <p class="contentDetail"><a id="samplesource32bit" href="https://download.dynamsoft.com/tool/twainds.win32.installer.2.1.3.msi">32-bit Sample Source</a> <a id="samplesource64bit" style="display:none;" href="https://download.dynamsoft.com/tool/twainds.win64.installer.2.1.3.msi">64-bit Sample Source</a> from <a target="_blank" href="http://www.twain.org">TWG</a></p>
+                                        </span>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div id="divUpload" class="divinput mt30" style="position:relative">
+                        <ul>
+                            <li id="tabSave" class="tabList selectTab" onclick="showUploadedFiles(false)">Save Documents</li>
+                            <li id="tabUploadedFiles" class="tabList unselectTab" onclick="showUploadedFiles(true)">
+                                <span>Uploaded Files</span>
+                                <div style="top: 40px;color: rgb(50, 50, 52);width: 300px;margin-left: -100px;display: none;" id="uploadedFilesDetail">All uploaded files are only visible to you and will be auto deleted from the demo server once you exit the page.</div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div id="tabCon" class="divinput mt30">
+                        <div id="divSaveDetail">
+                            <ul>
+                                <li>
+                                    <p>File Name:</p>
+                                    <input type="text" size="20" id="txt_fileName" /><span> . </span>
+                                    <select size="1" id="fileType" style="position:relative;width: 25%;" onchange="fileType_onchange();">
+                                        <option value=""></option>
+                                    </select>
+                                </li>
+                                <li>
+                                    Pages:
+                                    <label for='CurrentPage' style='margin-left:5px;'><input type='radio' id='CurrentPage' name='Pages' />Current Page </label>
+                                    <label for='AllPages'><input type='radio' id='AllPages' name='Pages' />All Pages</label>
+                                </li>
+                                <li>
+                                    <span class="customInfo" onmouseover="showCustomInfo();" onmouseout="hideCustomInfo();">Optional Custom Info <i class="fa fa-download"></i></span> :
+                                    <div style="display:none;" id="customDetail">You can input any custom info to be uploaded with your images.</div>
+                                    <input type="text" id="txt_CustomInfo" />
+                                </li>
+                                <li>
+                                    <input id="btnUpload" class="btnOrg" type="button" value="Upload" onclick="saveUploadImage('server')" />
+                                    <a id="btnSave" class="btnLoadAndSave" onclick="saveUploadImage('local')">Save to Local Drive ></a>
+                                </li>
+                                <li>
+                                    <span class="customInfo-left"><i class="fa fa-download"></i>Files uploaded are only visible to you and permanently deleted when you exit this demo.</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div id="divUploadedFiles" style="display:none;">
+                            <div id='resultWrap'></div>
+                        </div>
+                    </div>
+                    <div id='DWTdivMsg' class='clearfix'>
+                        <span class="lblMessage">Message:</span><br />
+                        <div id='DWTemessage'></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    window['bDWTOnlineDemo'] = true;
+</script> 
+<script src="Scripts/jquery.js?t=170607"></script> 
+<script src="Resources/dynamsoft.webtwain.config.js?t=170607"></script> 
+<script src="Resources/dynamsoft.webtwain.initiate.js?t=170607"></script> 
+<script src="Resources/addon/dynamsoft.webtwain.addon.pdf.js?t=170607"></script> 
+<script src="Scripts/online_demo_operation.js?t=170607"></script> 
+<script src="Scripts/online_demo_initpage.js?t=170607"></script> 
+<script>
+    $("ul.PCollapse li>div").click(function() {
+        if ($(this).next().css("display") == "none") {
+            $(".divType").next().hide("normal");
+            $(".divType").children(".mark_arrow").removeClass("expanded");
+            $(".divType").children(".mark_arrow").addClass("collapsed");
+            $(this).next().show("normal");
+            $(this).children(".mark_arrow").removeClass("collapsed");
+            $(this).children(".mark_arrow").addClass("expanded");
+        }
+    });
+</script> 
+<script>
+    // Assign the page onload fucntion.
+    $(function() {
+        pageonload();
+    });
+</script>
+</body>
+</html>
